@@ -198,21 +198,6 @@ export async function runReplyAgent(params: {
 
   await typingSignals.signalRunStart();
 
-  activeSessionEntry = await runMemoryFlushIfNeeded({
-    cfg,
-    followupRun,
-    sessionCtx,
-    opts,
-    defaultModel,
-    agentCfgContextTokens,
-    resolvedVerboseLevel,
-    sessionEntry: activeSessionEntry,
-    sessionStore: activeSessionStore,
-    sessionKey,
-    storePath,
-    isHeartbeat,
-  });
-
   const runFollowupTurn = createFollowupRunner({
     opts,
     typing,
@@ -500,6 +485,32 @@ export async function runReplyAgent(params: {
     }
     if (responseUsageLine) {
       finalPayloads = appendUsageLine(finalPayloads, responseUsageLine);
+    }
+
+    // Try to run memory flush after the main turn to avoid blocking the user response.
+    // We do this before finalizeWithFollowup, but it won't affect the payloads returned unless we explicitly modify them (we don't).
+    // The activeSessionEntry might have been updated by the turn, so we use the latest.
+    try {
+      const postTurnSessionEntry = await runMemoryFlushIfNeeded({
+        cfg,
+        followupRun,
+        sessionCtx,
+        opts,
+        defaultModel,
+        agentCfgContextTokens,
+        resolvedVerboseLevel,
+        sessionEntry: activeSessionEntry,
+        sessionStore: activeSessionStore,
+        sessionKey,
+        storePath,
+        isHeartbeat,
+      });
+      if (postTurnSessionEntry) {
+        activeSessionEntry = postTurnSessionEntry;
+      }
+    } catch (err) {
+      // Don't fail the request if flush fails
+      defaultRuntime.error(`Post-turn memory flush failed: ${String(err)}`);
     }
 
     return finalizeWithFollowup(

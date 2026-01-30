@@ -22,18 +22,18 @@ export function renderExecApprovalPrompt(state: AppViewState) {
   if (!active) return nothing;
   const request = active.request;
   const remainingMs = active.expiresAtMs - Date.now();
-  const remaining = remainingMs > 0 ? `expires in ${formatRemaining(remainingMs)}` : "expired";
+  const remaining = remainingMs > 0 ? `过期时间 ${formatRemaining(remainingMs)}` : "已过期";
   const queueCount = state.execApprovalQueue.length;
   return html`
     <div class="exec-approval-overlay" role="dialog" aria-live="polite">
       <div class="exec-approval-card">
         <div class="exec-approval-header">
           <div>
-            <div class="exec-approval-title">Exec approval needed</div>
+            <div class="exec-approval-title">需要执行批准</div>
             <div class="exec-approval-sub">${remaining}</div>
           </div>
           ${queueCount > 1
-            ? html`<div class="exec-approval-queue">${queueCount} pending</div>`
+            ? html`<div class="exec-approval-queue">${queueCount} 待处理</div>`
             : nothing}
         </div>
         <div class="exec-approval-command mono">${request.command}</div>
@@ -55,21 +55,21 @@ export function renderExecApprovalPrompt(state: AppViewState) {
             ?disabled=${state.execApprovalBusy}
             @click=${() => state.handleExecApprovalDecision("allow-once")}
           >
-            Allow once
+            允许一次
           </button>
           <button
             class="btn"
             ?disabled=${state.execApprovalBusy}
             @click=${() => state.handleExecApprovalDecision("allow-always")}
           >
-            Always allow
+            始终允许
           </button>
           <button
             class="btn danger"
             ?disabled=${state.execApprovalBusy}
             @click=${() => state.handleExecApprovalDecision("deny")}
           >
-            Deny
+            拒绝
           </button>
         </div>
       </div>

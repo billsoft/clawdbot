@@ -5,7 +5,7 @@ import type { MoltbotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { SILENT_REPLY_TOKEN } from "../tokens.js";
 
-export const DEFAULT_MEMORY_FLUSH_SOFT_TOKENS = 4000;
+export const DEFAULT_MEMORY_FLUSH_SOFT_TOKENS = 8000;
 
 export const DEFAULT_MEMORY_FLUSH_PROMPT = [
   "Pre-compaction memory flush.",
